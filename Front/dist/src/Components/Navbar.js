@@ -62,6 +62,7 @@ class Navbar extends HTMLElement {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept": "application/json",
         },
         body: JSON.stringify({ query, variables }),
       });

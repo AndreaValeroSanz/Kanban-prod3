@@ -9,6 +9,9 @@ import cors from 'cors';
 
 const app = express();
 
+// Configurar CORS
+app.use(cors());
+
 const startServer = async () => {
   const server = new ApolloServer({
     typeDefs,
