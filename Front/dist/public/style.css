@@ -217,3 +217,24 @@ li {
 task-sticker, task-sticker-xl {
   transition: all 0.3s ease-in-out;
 }
+.modalDLogin {
+  padding: 5em;
+ 
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 4px 6px rgba (0, 0, 0, 0.1);
+  
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.imgMCW {
+width: 500px;
+justify-items: flex-end;}
+
+.modal-content {
+  max-width: 400px;
+  width: 100%;
+padding:4em;}
