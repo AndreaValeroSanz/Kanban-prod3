@@ -1,5 +1,3 @@
-import { gql } from 'apollo-server-express';
-
 const typeDefs = gql`
 
   type Card {
@@ -12,17 +10,12 @@ const typeDefs = gql`
     user_id: ID!
     projects_id: ID!
   }
-type editCard {
-  _id: ID!
-  title: String!
-  description: String!
-  duedate: String!  
-  color: String
-}
+
   type User {
     _id: ID!
     email: String!
     password: String!
+    avatar: String # URL del avatar
   }
 
   type AuthPayload {
@@ -43,20 +36,18 @@ type editCard {
       type: String
       color: String
       projects_id:ID!
-        ): Card!
+    ): Card!
     deleteCard(id: ID!): Card!
-  editCard(
+    editCard(
       id: ID!
       title: String
       description: String
       duedate: String
       color: String
-      ): Card!
-    updateCardType(id: ID!, type: String!): Card! # New mutation for updating card type
+    ): Card!
+    updateCardType(id: ID!, type: String!): Card!
+    uploadAvatar(file: Upload!): User! # Nueva mutación para subir avatar
   }
-
-
-
 `;
 
 export default typeDefs;

@@ -1,3 +1,5 @@
+import { io } from "socket.io-client";
+
 class Navbar extends HTMLElement {
   connectedCallback() {
     this.render();
@@ -6,10 +8,10 @@ class Navbar extends HTMLElement {
 
   render() {
     const userEmail = localStorage.getItem("userEmail");
+    const userAvatar = localStorage.getItem("userAvatar");
 
     this.innerHTML = `
-
-     <!--<nav class="navbar p-0 m-0">
+      <nav class="navbar p-0 m-0">
         <div class="w-100 d-flex justify-content-between">
           <div class="container">
             <div class="bg-gray rounded-3 w-25 px-2">
@@ -20,16 +22,23 @@ class Navbar extends HTMLElement {
                 placeholder="Search for anything..."
               />
             </div>
-          </div> --> 
+          </div>
 
           ${
-            userEmail 
+            userEmail
               ? `<div class="d-flex align-items-center">
+                  ${
+                    userAvatar
+                      ? `<img src="${userAvatar}" alt="Avatar" class="rounded-circle me-2" style="width: 40px; height: 40px;">`
+                      : ""
+                  }
                   <span class="navbar-text me-2">${userEmail}</span>
+                  <input type="file" id="avatarInput" class="form-control d-none" />
+                  <label for="avatarInput" class="btn btn-sm btn-outline-secondary">Subir Avatar</label>
                   <button id="logoutButton" class="btn btn-outline-secondary btn-sm" title="Logout">
                     <i class="bi bi-box-arrow-right"></i>
                   </button>
-                 </div>`
+                </div>`
               : `<button 
                   type="button" 
                   class="btn btn-primary d-flex align-items-center" 
@@ -37,7 +46,7 @@ class Navbar extends HTMLElement {
                   data-bs-target="#loginModal" 
                   data-bs-whatever="email">
                   Login
-                 </button>`
+                </button>`
           }
         </div>
       </nav>
@@ -75,6 +84,9 @@ class Navbar extends HTMLElement {
 
     const logoutButton = this.querySelector("#logoutButton");
     if (logoutButton) logoutButton.addEventListener("click", this.handleLogout.bind(this));
+
+    const avatarInput = this.querySelector("#avatarInput");
+    if (avatarInput) avatarInput.addEventListener("change", this.uploadAvatar.bind(this));
   }
 
   async handleLogin(event) {
@@ -90,6 +102,7 @@ class Navbar extends HTMLElement {
           user {
             _id
             email
+            avatar
           }
         }
       }
@@ -113,8 +126,11 @@ class Navbar extends HTMLElement {
       }
 
       const token = result.data.login.token;
+      const user = result.data.login.user;
+
       localStorage.setItem("token", token);
-      localStorage.setItem("userEmail", email);
+      localStorage.setItem("userEmail", user.email);
+      localStorage.setItem("userAvatar", user.avatar || "");
 
       alert("Login successful");
 
@@ -122,8 +138,6 @@ class Navbar extends HTMLElement {
       modal.hide();
 
       this.render(); // Re-render to show the email and logout button
-
-      // Refresh the page to reset the navbar and state
       window.location.reload();
     } catch (error) {
       console.error("Connection error:", error);
@@ -132,12 +146,41 @@ class Navbar extends HTMLElement {
   }
 
   handleLogout() {
-    // Remove token and user email from localStorage
     localStorage.removeItem("token");
     localStorage.removeItem("userEmail");
-
-    // Refresh the page to reset the navbar and state
+    localStorage.removeItem("userAvatar");
     window.location.reload();
+  }
+
+  async uploadAvatar(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = async () => {
+      const fileContent = reader.result.split(',')[1]; // Obtener contenido base64
+      const fileName = file.name;
+
+      const userId = localStorage.getItem("userId"); // Asumimos que el ID del usuario está en localStorage
+
+      if (!userId) {
+        alert("Usuario no autenticado");
+        return;
+      }
+
+      const socket = io("http://localhost:3000");
+
+      socket.emit("upload_avatar", { userId, fileName, fileContent }, (response) => {
+        if (response.success) {
+          alert("Avatar subido correctamente");
+          localStorage.setItem("userAvatar", response.avatarUrl);
+          this.render(); // Actualizar navbar con el nuevo avatar
+        } else {
+          alert("Error al subir el avatar: " + response.message);
+        }
+      });
+    };
+
+    reader.readAsDataURL(file); // Leer archivo como base64
   }
 }
 
