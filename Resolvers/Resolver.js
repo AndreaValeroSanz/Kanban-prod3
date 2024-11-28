@@ -1,12 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
-import Card from '../models/card.js';
-import fs from 'fs';
-import path from 'path';
 
-const SECRET_KEY = "gommit";
-
+const SECRET_KEY = 'gommit';
 const resolvers = {
   Query: {
     getAllCards: async (_, __, { userId }) => {
@@ -25,28 +21,42 @@ const resolvers = {
       const token = jwt.sign({ userId: user._id, email: user.email }, SECRET_KEY, { expiresIn: '3h' });
       return { token, user };
     },
-
-    uploadAvatar: async (_, { file }, { userId }) => {
+    createCard: async (_, { title, description, duedate, type, color, projects_id }, { userId }) => {
       if (!userId) throw new Error('No autorizado');
 
-      const { createReadStream, filename } = await file;
-      const uploadPath = path.join(__dirname, '../uploads', filename);
-
-      await new Promise((resolve, reject) => {
-        createReadStream()
-          .pipe(fs.createWriteStream(uploadPath))
-          .on('finish', resolve)
-          .on('error', reject);
+      const newCard = new Card({
+        title,
+        description,
+        duedate,
+        type,
+        color,
+        user_id: userId,
+        projects_id,
       });
 
-      const avatarUrl = `http://localhost:3000/uploads/${filename}`;
-      const updatedUser = await User.findByIdAndUpdate(
-        userId,
-        { avatar: avatarUrl },
+      return await newCard.save();
+    },
+    deleteCard: async (_, { id }, { userId }) => {
+      if (!userId) throw new Error('No autorizado');
+      return await Card.findOneAndDelete({ _id: id, user_id: userId });
+    },
+    editCard: async (_, { id, title, description, duedate, color }, { userId }) => {
+      if (!userId) throw new Error('No autorizado');
+
+      return await Card.findByIdAndUpdate(
+        id,
+        { title, description, duedate, color },
         { new: true }
       );
+    },
+    updateCardType: async (_, { id, type }, { userId }) => {
+      if (!userId) throw new Error('No autorizado');
 
-      return updatedUser;
+      const card = await Card.findOne({ _id: id, user_id: userId });
+      if (!card) throw new Error('Tarjeta no encontrada o no autorizada');
+
+      card.type = type;
+      return await card.save();
     },
   },
 };

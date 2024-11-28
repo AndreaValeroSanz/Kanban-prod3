@@ -131,13 +131,14 @@ class Navbar extends HTMLElement {
       localStorage.setItem("token", token);
       localStorage.setItem("userEmail", user.email);
       localStorage.setItem("userAvatar", user.avatar || "");
+      localStorage.setItem("userId", user._id);
 
       alert("Login successful");
 
       const modal = bootstrap.Modal.getInstance(document.getElementById("loginModal"));
       modal.hide();
 
-      this.render(); // Re-render to show the email and logout button
+      this.render();
       window.location.reload();
     } catch (error) {
       console.error("Connection error:", error);
@@ -149,6 +150,7 @@ class Navbar extends HTMLElement {
     localStorage.removeItem("token");
     localStorage.removeItem("userEmail");
     localStorage.removeItem("userAvatar");
+    localStorage.removeItem("userId");
     window.location.reload();
   }
 
@@ -157,10 +159,10 @@ class Navbar extends HTMLElement {
     const reader = new FileReader();
 
     reader.onload = async () => {
-      const fileContent = reader.result.split(',')[1]; // Obtener contenido base64
+      const fileContent = reader.result.split(',')[1];
       const fileName = file.name;
 
-      const userId = localStorage.getItem("userId"); // Asumimos que el ID del usuario está en localStorage
+      const userId = localStorage.getItem("userId");
 
       if (!userId) {
         alert("Usuario no autenticado");
@@ -173,14 +175,14 @@ class Navbar extends HTMLElement {
         if (response.success) {
           alert("Avatar subido correctamente");
           localStorage.setItem("userAvatar", response.avatarUrl);
-          this.render(); // Actualizar navbar con el nuevo avatar
+          this.render();
         } else {
           alert("Error al subir el avatar: " + response.message);
         }
       });
     };
 
-    reader.readAsDataURL(file); // Leer archivo como base64
+    reader.readAsDataURL(file);
   }
 }
 

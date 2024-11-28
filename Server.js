@@ -6,19 +6,26 @@ import mongoose from 'mongoose';
 import { connectDB } from './config/db.js';
 import { auth } from './auth.js';
 import cors from 'cors';
-import path from 'path';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
+import path from 'path';
+import User from './models/user.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-const httpServer = createServer(app); // Crear servidor HTTP para trabajar con Socket.IO
+const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: '*', // Cambia esto según tu configuración
+    origin: '*',
     methods: ['GET', 'POST'],
   },
 });
+
+app.use(cors());
 
 const startServer = async () => {
   const server = new ApolloServer({
@@ -40,21 +47,29 @@ const startServer = async () => {
 
   connectDB();
 
-  // Manejar subida de archivos con Socket.IO
+  // Ensure the 'public/avatars' directory exists
+  const uploadDir = path.join(__dirname, 'front', 'dist', 'public', 'avatars');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+
+  // Serve static files from 'public/avatars'
+  app.use('/avatars', express.static(uploadDir));
+
   io.on('connection', (socket) => {
     console.log('Cliente conectado:', socket.id);
 
-    socket.on('upload_avatar', (data, callback) => {
+    socket.on('upload_avatar', async (data, callback) => {
       const { userId, fileName, fileContent } = data;
 
       if (!userId) {
-        callback({ success: false, message: 'Usuario no autorizado' });
+        callback({ success: false, message: 'Usuario no autenticado' });
         return;
       }
 
-      const uploadPath = path.join(__dirname, 'uploads', fileName);
+      const uploadPath = path.join(uploadDir, fileName);
 
-      // Guardar archivo como imagen
+      // Save the file
       fs.writeFile(uploadPath, fileContent, 'base64', async (err) => {
         if (err) {
           console.error('Error al guardar el archivo:', err);
@@ -62,9 +77,9 @@ const startServer = async () => {
         } else {
           console.log('Archivo guardado en:', uploadPath);
 
-          // Actualizar avatar del usuario
-          const avatarUrl = `http://localhost:3000/uploads/${fileName}`;
-          await mongoose.model('User').findByIdAndUpdate(userId, { avatar: avatarUrl });
+          // Update the user's avatar in the database
+          const avatarUrl = `/public/avatars/${fileName}`;
+          await User.findByIdAndUpdate(userId, { avatar: avatarUrl });
 
           callback({ success: true, message: 'Avatar subido correctamente', avatarUrl });
         }
@@ -75,9 +90,6 @@ const startServer = async () => {
       console.log('Cliente desconectado:', socket.id);
     });
   });
-
-  // Servir archivos estáticos
-  app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
   const PORT = process.env.PORT || 3000;
   httpServer.listen(PORT, () => {

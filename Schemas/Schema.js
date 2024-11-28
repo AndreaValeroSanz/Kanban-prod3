@@ -1,5 +1,5 @@
+import { gql } from 'apollo-server-express';
 const typeDefs = gql`
-
   type Card {
     _id: ID!
     title: String!
@@ -15,7 +15,7 @@ const typeDefs = gql`
     _id: ID!
     email: String!
     password: String!
-    avatar: String # URL del avatar
+    avatar: String
   }
 
   type AuthPayload {
@@ -35,7 +35,7 @@ const typeDefs = gql`
       duedate: String!
       type: String
       color: String
-      projects_id:ID!
+      projects_id: ID!
     ): Card!
     deleteCard(id: ID!): Card!
     editCard(
@@ -46,7 +46,6 @@ const typeDefs = gql`
       color: String
     ): Card!
     updateCardType(id: ID!, type: String!): Card!
-    uploadAvatar(file: Upload!): User! # Nueva mutación para subir avatar
   }
 `;
 
