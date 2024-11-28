@@ -1,4 +1,4 @@
-class board extends HTMLElement{  
+/*class Board extends HTMLElement{  
     constructor(){
       super();
     }
@@ -29,4 +29,4 @@ class board extends HTMLElement{
 
 
 };
-customElements.define('board', board);
+customElements.define('Board', Board);*/
