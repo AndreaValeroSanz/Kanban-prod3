@@ -1,11 +1,15 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const projectSchema = new mongoose.Schema({
-    user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Reference to the User model
-    title: String, // Project title
-    color: String // Hex color code for the project
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
+    title: {
+        type: String,
+        required: true,
+    },
 });
 
-const Project = mongoose.model("Project", projectSchema);
-
-export default Project;
+export default mongoose.model('Project', projectSchema);
