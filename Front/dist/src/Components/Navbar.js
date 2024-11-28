@@ -118,8 +118,14 @@ class Navbar extends HTMLElement {
       const user = result.data.login.user;
 
       localStorage.setItem("token", token);
+      console.log("userEmail:", user.email);
+      
       localStorage.setItem("userEmail", user.email);
+      console.log("userAvatar:", user.avatar);
+      
       localStorage.setItem("userAvatar", user.avatar || "");
+      console.log("userId", user._id );
+      
       localStorage.setItem("userId", user._id);
 
       alert("Login successful");

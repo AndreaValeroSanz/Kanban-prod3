@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 user {
                     _id
                     email
+                    avatar
                 }
             }
         }
@@ -53,8 +54,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Extraer el token y guardar en localStorage
             const token = result.data.login.token;
+            const user = result.data.login.user;
+
             localStorage.setItem("token", token);
-            localStorage.setItem("userEmail", email);
+            localStorage.setItem("userEmail", user.email);
+            localStorage.setItem("userAvatar", user.avatar || "");
+            localStorage.setItem("userId", user._id);
 
             alert("Login successful");
 
