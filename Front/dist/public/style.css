@@ -230,7 +230,7 @@ task-sticker, task-sticker-xl {
 width: 469px;
 justify-items: flex-end;}
 
-.modal-content {
+.modal-content-login {
   max-width: 400px;
   width: 100%;
   padding:4em;}
@@ -273,8 +273,7 @@ justify-items: flex-end;}
         background: none;
         border: none;
         color: #6c757d;
-        transition: color 0.2s;
-        
+        transition: color 0.2s;      
         
       }
 

@@ -1,4 +1,7 @@
 class board extends HTMLElement{  
+    constructor(){
+      super();
+    }
     
   //Mirar si se puede añadir fondos de colorinchis
     this.innerHTML = `
@@ -25,5 +28,5 @@ class board extends HTMLElement{
       
 
 
-}
+};
 customElements.define('board', board);
