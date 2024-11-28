@@ -57,7 +57,8 @@ type editCard {
       duedate: String
       color: String
       ): Card!
-    updateCardType(id: ID!, type: String!): Card! # New mutation for updating card type
+    updateCardType(id: ID!, type: String!): Card! 
+    createProject(title: String!, userId: String!): Project!
   }
 
 

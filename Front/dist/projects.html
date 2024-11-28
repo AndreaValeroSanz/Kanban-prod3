@@ -31,8 +31,23 @@
           </div>
         </div>
         
-        <!-- Add Projects -->
+        <!-- Create Project Button -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Tus Proyectos</h1>
+            <button id="createProjectButton" class="btn btn-primary">Crear nuevo proyecto</button>
+        </div>
 
+        <!-- Modal Form to Add Project -->
+        <div id="createProjectForm" class="mb-3" style="display:none;">
+            <form id="projectForm">
+                <div class="mb-3">
+                    <label for="projectTitle" class="col-form-label">Título del Proyecto:</label>
+                    <input type="text" class="form-control" id="projectTitle" required>
+                </div>
+                <button type="submit" class="btn btn-success">Crear Proyecto</button>
+                <button type="button" id="cancelButton" class="btn btn-secondary">Cancelar</button>
+            </form>
+        </div>
 
         <!-- Projects List-->
         <div class="container mt-5">

@@ -160,6 +160,24 @@ const resolvers = {
         throw new Error(`Error al actualizar el tipo de tarjeta: ${error.message}`);
       }
     },
+
+    createProject: async (_, { title, userId }) => {
+      try {
+        if (!userId) {
+          throw new Error("No autorizado");
+        }
+
+        const newProject = new Project({
+          title,
+          user_id: userId,
+        });
+
+        const savedProject = await newProject.save();
+        return savedProject;
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    },
   },
 };
 
