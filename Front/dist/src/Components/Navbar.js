@@ -23,9 +23,9 @@ class Navbar extends HTMLElement {
                   }
                   <span class="navbar-text me-2">${userEmail}</span>
                   <input type="file" id="avatarInput" class="form-control d-none" />
-                  <label for="avatarInput" class="btn btn-sm btn-outline-secondary">Subir Avatar</label>
-                  <button id="logoutButton" class="btn btn-outline-secondary btn-sm" title="Logout">
-                    <i class="bi bi-box-arrow-right"></i>
+                  <label for="avatarInput" class="btn btn-sm btn-outline-dark"><i class="bi bi-exposure bg-transparent"></i></label>
+                  <button id="logoutButton" class="btn btn-outline-dark btn-sm" title="Logout">
+                    <i class="bi bi-box-arrow-right bg-transparent"></i>
                   </button>
                 </div>`
               : `<button 
