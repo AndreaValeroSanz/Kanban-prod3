@@ -15,7 +15,7 @@ class board extends HTMLElement{
     >
       <div class="custom-card">
         <div class="card-header position-relative">
-          <div class="card-title">Contenido</div>
+          <div class="card-title-board">Contenido</div>
           <button class="delete-btn ">
             <i class="bi bi-trash3" style="font-size: 1.2rem;"></i>
           </button>
