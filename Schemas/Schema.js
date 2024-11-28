@@ -25,8 +25,13 @@ const typeDefs = gql`
 
   type Query {
     getAllCards: [Card]
+    projects: [Project!]!
   }
-
+  type Project {
+      _id: ID!
+      user_id: ID!
+      title: String!
+  }
   type Mutation {
     login(email: String!, password: String!): AuthPayload!
     createCard(

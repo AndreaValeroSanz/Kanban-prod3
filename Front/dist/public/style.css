@@ -37,7 +37,7 @@ body {
 }
 
 .topbar {
-  padding-top: 2vh;
+  padding-top: 2vh;  
   height: 7vh;
   border-bottom: 1px solid var(--gris);
 }
@@ -217,3 +217,67 @@ li {
 task-sticker, task-sticker-xl {
   transition: all 0.3s ease-in-out;
 }
+.modalDLogin {   
+  border-radius: 8px;
+  padding-top: 9vh;
+  box-shadow: 0 4px 6px rgba (0, 0, 0, 0.1); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.imgMCW {
+width: 469px;
+justify-items: flex-end;}
+
+.modal-content-login {
+  max-width: 400px;
+  width: 100%;
+  padding:4em;}
+
+  .signinButton{
+    background-color: #702a5e;
+    color:#ffffff;}
+    
+    .signinButton:hover{
+      background-color: #fed789 !important;
+      color:#343434 !important;}
+      
+  
+
+    .custom-card {
+      width: 300px;
+      height: 180px;
+      border-radius: 8px;
+      border-style: solid;
+      border-width:1px;
+      background-color: #f4c0f3; 
+    }
+  
+    .card-title-board {
+      font-size: 16px; /* Ajusta el tamaño si es necesario */
+      margin-top: auto;
+      text-align: left;
+      padding-left:10px;
+      padding-top:6px;
+    }
+       .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: transparent;
+        border-bottom: none;
+      }
+
+      .delete-btn {
+        background: none;
+        border: none;
+        color: #6c757d;
+        transition: color 0.2s;      
+        
+      }
+
+      .delete-btn:hover {
+        color: #dc3545;
+      }
+      

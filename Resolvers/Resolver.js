@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
 import Card from '../models/card.js'; // Ensure you have the Card model
+import Project from '../models/project.js';
 
 const SECRET_KEY = "gommit";
 
@@ -15,6 +16,19 @@ const resolvers = {
 
         const cards = await Card.find({ user_id: userId });
         return cards;
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    },
+
+    projects: async (_, __, { userId }) => {
+      try {
+        if (!userId) {
+          throw new Error("No autorizado");
+        }
+
+        const projects = await Project.find({ user_id: userId });
+        return projects;
       } catch (error) {
         throw new Error(error.message);
       }
@@ -93,8 +107,8 @@ const resolvers = {
       }
     },
     editCard: async (
-      _, 
-      { id, title, description, duedate,  color },
+      _,
+      { id, title, description, duedate, color },
       { userId }
     ) => {
       try {
@@ -102,16 +116,16 @@ const resolvers = {
           throw new Error('No autorizado');
         }
 
-      
+
         const updatedCard = await Card.findByIdAndUpdate(
           id,
           {
             ...(title && { title }),
             ...(description && { description }),
             ...(duedate && { duedate }),
-            
+
             ...(color && { color }),
-           
+
           },
           { new: true }
         );
