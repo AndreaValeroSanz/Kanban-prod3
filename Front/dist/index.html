@@ -12,30 +12,24 @@
     <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.css" />
 
-    <title>Midnight Coffee Warriors</title>
+    <title>Log-in  - Midnight Coffee Warriors</title>
 </head>
 
 <body>
     <div class="px-5">
-        <div class="row">
-            <div class="menu col-lg-2 topbar ">
-                <div class="text-center">
-                    <p>Midnight Coffee Warriors</p>
-                </div>
-            </div>
-
-            <div class="col-lg-10 topbar">
-                <div class="d-flex justify-content-end">
-                    <my-navbar></my-navbar>
-                </div>
+        <div class="menu topbar ">
+            <div class="text-left">
+                <p>Midnight Coffee Warriors</p>
             </div>
         </div>
     </div>
 
     <!-- Modal Structure -->
-    <div class="" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel">
-        <div class="modal-dialog">
-            <div class="modal-content">
+     
+    <div class="modalDLogin" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel">
+        
+            <div > <img src="/public/assets/MCW.png "  class="imgMCW" alt="MCW Logo"  /></div>
+            <div class="modal-content-login " >
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="loginModalLabel">Login</h1>
                 </div>
@@ -49,11 +43,12 @@
                             <label for="password" class="col-form-label">Password:</label>
                             <input type="password" class="form-control" id="password" required>
                         </div>
-                        <button type="submit" id="signinButton" class="btn btn-primary">Sign in</button>
+                        <button type="submit" id="signinButton" class="btn signinButton">Sign in</button>
                     </form>
                 </div>
             </div>
-        </div>
+        
+       
     </div>
 
 
