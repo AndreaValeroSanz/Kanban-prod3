@@ -82,6 +82,7 @@ const startServer = async () => {
           await User.findByIdAndUpdate(userId, { avatar: avatarUrl });
 
           callback({ success: true, message: 'Avatar subido correctamente', avatarUrl });
+          
         }
       });
     });

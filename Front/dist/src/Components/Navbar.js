@@ -176,6 +176,7 @@ class Navbar extends HTMLElement {
           alert("Avatar subido correctamente");
           localStorage.setItem("userAvatar", response.avatarUrl);
           this.render();
+          window.location.reload();
         } else {
           alert("Error al subir el avatar: " + response.message);
         }
