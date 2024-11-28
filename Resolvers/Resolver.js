@@ -1,62 +1,150 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
+import Card from '../models/card.js'; // Ensure you have the Card model
 
-const SECRET_KEY = 'gommit';
+const SECRET_KEY = "gommit";
+
 const resolvers = {
   Query: {
     getAllCards: async (_, __, { userId }) => {
-      if (!userId) throw new Error('No autorizado');
-      return await Card.find({ user_id: userId });
+      try {
+        if (!userId) {
+          throw new Error('No autorizado');
+        }
+
+        const cards = await Card.find({ user_id: userId });
+        return cards;
+      } catch (error) {
+        throw new Error(error.message);
+      }
     },
   },
   Mutation: {
     login: async (_, { email, password }) => {
-      const user = await User.findOne({ email });
-      if (!user) throw new Error('Usuario no encontrado');
+      try {
+        const user = await User.findOne({ email });
+        if (!user) {
+          throw new Error('Usuario no encontrado');
+        }
 
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) throw new Error('Contraseña incorrecta');
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+          throw new Error('Contraseña incorrecta');
+        }
 
-      const token = jwt.sign({ userId: user._id, email: user.email }, SECRET_KEY, { expiresIn: '3h' });
-      return { token, user };
+        const token = jwt.sign(
+          { userId: user._id, email: user.email },
+          SECRET_KEY,
+          { expiresIn: '3h' }
+        );
+
+        return {
+          token,
+          user,
+        };
+      } catch (error) {
+        throw new Error(error.message);
+      }
     },
-    createCard: async (_, { title, description, duedate, type, color, projects_id }, { userId }) => {
-      if (!userId) throw new Error('No autorizado');
+    createCard: async (
+      _,
+      { title, description, duedate, type, color, projects_id },
+      { userId }
+    ) => {
+      try {
+        if (!userId) {
+          throw new Error('No autorizado');
+        }
 
-      const newCard = new Card({
-        title,
-        description,
-        duedate,
-        type,
-        color,
-        user_id: userId,
-        projects_id,
-      });
+        const defaultProjectId = "67224b9d9040a876aa6e7013";
+        const projectIdToUse = projects_id || defaultProjectId;
 
-      return await newCard.save();
+        const newCard = new Card({
+          title,
+          description,
+          duedate,
+          type,
+          color,
+          user_id: userId,
+          projects_id: projectIdToUse,
+        });
+
+        const savedCard = await newCard.save();
+        return savedCard;
+      } catch (error) {
+        throw new Error(error.message);
+      }
     },
     deleteCard: async (_, { id }, { userId }) => {
-      if (!userId) throw new Error('No autorizado');
-      return await Card.findOneAndDelete({ _id: id, user_id: userId });
-    },
-    editCard: async (_, { id, title, description, duedate, color }, { userId }) => {
-      if (!userId) throw new Error('No autorizado');
+      try {
+        if (!userId) {
+          throw new Error('No autorizado');
+        }
 
-      return await Card.findByIdAndUpdate(
-        id,
-        { title, description, duedate, color },
-        { new: true }
-      );
+        const deletedCard = await Card.findOneAndDelete({ _id: id, user_id: userId });
+        if (!deletedCard) {
+          throw new Error('Tarjeta no encontrada o no autorizada para eliminar');
+        }
+
+        return deletedCard;
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    },
+    editCard: async (
+      _, 
+      { id, title, description, duedate,  color },
+      { userId }
+    ) => {
+      try {
+        if (!userId) {
+          throw new Error('No autorizado');
+        }
+
+      
+        const updatedCard = await Card.findByIdAndUpdate(
+          id,
+          {
+            ...(title && { title }),
+            ...(description && { description }),
+            ...(duedate && { duedate }),
+            
+            ...(color && { color }),
+           
+          },
+          { new: true }
+        );
+
+        if (!updatedCard) {
+          throw new Error('Tarjeta no encontrada');
+        }
+
+        return updatedCard;
+      } catch (error) {
+        throw new Error(`Error al editar la tarjeta: ${error.message}`);
+      }
     },
     updateCardType: async (_, { id, type }, { userId }) => {
-      if (!userId) throw new Error('No autorizado');
+      try {
+        if (!userId) {
+          throw new Error('No autorizado');
+        }
 
-      const card = await Card.findOne({ _id: id, user_id: userId });
-      if (!card) throw new Error('Tarjeta no encontrada o no autorizada');
+        // Find the card and make sure it belongs to the current user
+        const card = await Card.findOne({ _id: id, user_id: userId });
+        if (!card) {
+          throw new Error('Tarjeta no encontrada o no autorizada');
+        }
 
-      card.type = type;
-      return await card.save();
+        // Update the type
+        card.type = type;
+        const updatedCard = await card.save();
+
+        return updatedCard;
+      } catch (error) {
+        throw new Error(`Error al actualizar el tipo de tarjeta: ${error.message}`);
+      }
     },
   },
 };
