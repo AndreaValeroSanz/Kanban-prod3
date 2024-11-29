@@ -1,13 +1,17 @@
 // Add Projects
+
 document.addEventListener("DOMContentLoaded", () => {
     const createProjectButton = document.getElementById("createProjectButton");
     const createProjectForm = document.getElementById("createProjectForm");
     const projectForm = document.getElementById("projectForm");
-    const cancelButton = document.getElementById("cancelButton");
-    const projectsContainer = document.getElementById("projectsContainer"); // Contenedor de la lista de proyectos
+    const editProjectForm = document.getElementById("editProjectForm"); // El formulario para editar proyectos
+    const projectTitleInput = document.getElementById("editProjectTitle"); // Input para editar el título
+
+    let currentEditProjectId = null; // Variable para guardar el ID del proyecto que se está editando
 
     // Inicialmente ocultar el formulario
     createProjectForm.style.display = "none";
+    editProjectForm.style.display = "none";
 
     // Mostrar el formulario al hacer clic en el botón "Crear nuevo proyecto"
     createProjectButton.addEventListener("click", () => {
@@ -157,3 +161,99 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Edit Projects
 
+const editProject = async (projectId) => {
+    // Mostrar el formulario de edición
+    editProjectForm.style.display = "block";
+    currentEditProjectId = projectId;
+
+    // Obtener el proyecto para editarlo
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Por favor, inicia sesión primero.");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:3000/graphql", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                query: `
+                    query GetProjectById($id: ID!) {
+                        project(id: $id) {
+                            _id
+                            title
+                        }
+                    }
+                `,
+                variables: { id: projectId },
+            }),
+        });
+
+        const result = await response.json();
+        if (result.errors) {
+            console.error("Error al obtener el proyecto:", result.errors[0].message);
+            return;
+        }
+
+        const project = result.data.project;
+        projectTitleInput.value = project.title; // Cargar el título del proyecto en el formulario
+
+    } catch (error) {
+        console.error("Error al cargar el proyecto:", error);
+        alert("Hubo un error al cargar el proyecto. Intenta nuevamente.");
+    }
+};
+
+// Enviar el formulario para editar el proyecto
+editProjectForm.addEventListener("submit", async (event) => {
+    event.preventDefault(); // Evitar el envío tradicional del formulario
+
+    const newTitle = projectTitleInput.value;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Por favor, inicia sesión primero.");
+        return;
+    }
+
+    // Realizar la solicitud para actualizar el proyecto
+    try {
+        const response = await fetch("http://localhost:3000/graphql", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                query: `
+                    mutation EditProject($id: ID!, $title: String!) {
+                        editProject(id: $id, title: $title) {
+                            _id
+                            title
+                        }
+                    }
+                `,
+                variables: { id: currentEditProjectId, title: newTitle },
+            }),
+        });
+
+        const result = await response.json();
+        if (result.errors) {
+            console.error("Error al editar el proyecto:", result.errors);
+            alert("Error al editar el proyecto.");
+        } else {
+            alert("Proyecto editado con éxito.");
+            editProjectForm.style.display = "none"; // Ocultar el formulario de edición
+            fetchProjects(); // Recargar los proyectos después de la edición
+        }
+    } catch (error) {
+        console.error("Error al editar el proyecto:", error);
+        alert("Hubo un error al editar el proyecto. Intenta nuevamente.");
+    }
+});

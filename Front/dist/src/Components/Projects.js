@@ -77,18 +77,92 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         projectsContainer.appendChild(list);
 
-        // Añadir eventos a los botones
+        // Añadir eventos a los botones de edición
         document.querySelectorAll(".edit-btn").forEach((btn) =>
-            btn.addEventListener("click", (event) => {
+            btn.addEventListener("click", async (event) => {
                 const projectId = event.currentTarget.getAttribute("data-id");
-                alert(`Editar proyecto: ${projectId}`);
+                const newTitle = prompt("Introduce el nuevo título del proyecto:");
+
+                if (newTitle && newTitle.trim() !== "") {
+                    // Enviar la solicitud de edición al servidor
+                    const mutation = `
+                        mutation EditProject($id: ID!, $title: String!) {
+                            editProject(id: $id, title: $title) {
+                                _id
+                                title
+                            }
+                        }
+                    `;
+
+                    const variables = { id: projectId, title: newTitle };
+
+                    try {
+                        const response = await fetch("http://localhost:3000/graphql", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${token}`,
+                            },
+                            body: JSON.stringify({ query: mutation, variables }),
+                        });
+
+                        const result = await response.json();
+
+                        if (result.errors) {
+                            alert("Error al editar el proyecto: " + result.errors[0].message);
+                        } else {
+                            alert("Proyecto editado con éxito.");
+                            // Actualiza la vista
+                            window.location.reload();
+                        }
+                    } catch (error) {
+                        console.error("Error al editar el proyecto:", error);
+                        alert("Hubo un error al editar el proyecto.");
+                    }
+                }
             })
         );
 
+        // Añadir eventos a los botones de eliminación
         document.querySelectorAll(".delete-btn").forEach((btn) =>
-            btn.addEventListener("click", (event) => {
+            btn.addEventListener("click", async (event) => {
                 const projectId = event.currentTarget.getAttribute("data-id");
-                alert(`Eliminar proyecto: ${projectId}`);
+
+                const confirmation = confirm("¿Estás seguro de que deseas eliminar este proyecto?");
+                if (confirmation) {
+                    const mutation = `
+                        mutation DeleteProject($id: ID!) {
+                            deleteProject(id: $id) {
+                                _id
+                                title
+                            }
+                        }
+                    `;
+
+                    try {
+                        const response = await fetch("http://localhost:3000/graphql", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${token}`,
+                            },
+                            body: JSON.stringify({ query: mutation, variables: { id: projectId } }),
+                        });
+
+                        const result = await response.json();
+
+                        if (result.errors) {
+                            alert("Error al eliminar el proyecto: " + result.errors[0].message);
+                        } else {
+                            alert("Proyecto eliminado con éxito.");
+                            // Actualiza la vista
+                            window.location.reload();
+                        }
+                    } catch (error) {
+                        console.error("Error al eliminar el proyecto:", error);
+                        alert("Hubo un error al eliminar el proyecto.");
+                    }
+                }
             })
         );
 

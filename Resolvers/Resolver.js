@@ -177,6 +177,31 @@ const resolvers = {
           throw new Error("No se pudo crear el proyecto.");
       }
   },
+  editProject: async (_, { id, title }, { userId }) => {
+    try {
+      if (!userId) {
+        throw new Error('No autorizado');
+      }
+  
+      // Buscar el proyecto con el ID proporcionado
+      const project = await Project.findOne({ _id: id, user_id: userId });
+  
+      if (!project) {
+        throw new Error('Proyecto no encontrado o no autorizado');
+      }
+  
+      // Actualizar el título del proyecto
+      project.title = title || project.title;  // Si no se pasa título, mantén el actual
+  
+      // Guardar el proyecto actualizado
+      const updatedProject = await project.save();
+  
+      return updatedProject;
+    } catch (error) {
+      throw new Error(`Error al editar el proyecto: ${error.message}`);
+    }
+  },
+  
 },
 };
 
