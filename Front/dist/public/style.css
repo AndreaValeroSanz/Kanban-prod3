@@ -280,4 +280,29 @@ justify-items: flex-end;}
       .delete-btn:hover {
         color: #dc3545;
       }
-      
+      .createProjectButton  {
+      background-color: #702a5e;
+      color:#ffffff;}
+
+      .createProjectButton:hover{
+        background-color: #fed789 !important;
+        color:#343434 !important;}
+
+        .submitButton{
+          background-color: #fed789;
+          color:#343434;}
+          
+          .submitButton:hover{
+            background-color: #702a5e !important;
+            color:#ffffff !important;}
+            
+.edit-btn{
+  color: #702a5e;
+outline-color: #702a5e;
+border-color: #702a5e;
+}
+.edit-btn:hover{
+  background:#fed789;
+  border-color: #fed789;
+
+}
