@@ -163,22 +163,21 @@ const resolvers = {
 
     createProject: async (_, { title, userId }) => {
       try {
-        if (!userId) {
-          throw new Error("No autorizado");
-        }
+          // Crear un nuevo proyecto con los datos recibidos
+          const newProject = new Project({
+              title,
+              user_id: userId, // Vincular con el ID del usuario
+          });
 
-        const newProject = new Project({
-          title,
-          user_id: userId,
-        });
-
-        const savedProject = await newProject.save();
-        return savedProject;
+          // Guardar el proyecto en la base de datos
+          const savedProject = await newProject.save();
+          return savedProject;
       } catch (error) {
-        throw new Error(error.message);
+          console.error("Error al crear el proyecto:", error);
+          throw new Error("No se pudo crear el proyecto.");
       }
-    },
   },
+},
 };
 
 export default resolvers;

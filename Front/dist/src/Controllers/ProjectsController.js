@@ -4,6 +4,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const createProjectForm = document.getElementById("createProjectForm");
     const projectForm = document.getElementById("projectForm");
     const cancelButton = document.getElementById("cancelButton");
+    const projectsContainer = document.getElementById("projectsContainer"); // Contenedor de la lista de proyectos
+
+    // Inicialmente ocultar el formulario
+    createProjectForm.style.display = "none";
 
     // Mostrar el formulario al hacer clic en el botón "Crear nuevo proyecto"
     createProjectButton.addEventListener("click", () => {
@@ -15,17 +19,11 @@ document.addEventListener("DOMContentLoaded", () => {
         createProjectForm.style.display = "none";
     });
 
-    // Enviar el formulario para crear el nuevo proyecto
-    projectForm.addEventListener("submit", async (event) => {
-        event.preventDefault(); // Evita que el formulario se envíe de forma tradicional
-
-        const title = document.getElementById("projectTitle").value;
-
-        // Asegúrate de que el usuario esté autenticado (obteniendo el token del localStorage)
+    // Función para recargar la lista de proyectos
+    const fetchProjects = async () => {
         const token = localStorage.getItem("token");
-
         if (!token) {
-            alert("Por favor, inicia sesión primero.");
+            console.error("No se encontró un token válido. Por favor, inicia sesión.");
             return;
         }
 
@@ -34,8 +32,92 @@ document.addEventListener("DOMContentLoaded", () => {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "Authorization": `Bearer ${token}`, // Incluir el token en los headers
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    query: `
+                        query {
+                            projects {
+                                _id
+                                title
+                            }
+                        }
+                    `,
+                }),
+            });
+
+            const result = await response.json();
+            if (result.errors) {
+                console.error("Error al obtener los proyectos:", result.errors[0].message);
+                return;
+            }
+
+            const projects = result.data.projects;
+            renderProjects(projects);
+        } catch (error) {
+            console.error("Error al obtener los proyectos:", error);
+        }
+    };
+
+    // Función para renderizar los proyectos en el contenedor
+    const renderProjects = (projects) => {
+        projectsContainer.innerHTML = ""; // Limpiar el contenedor
+        projects.forEach((project) => {
+            const listItem = document.createElement("li");
+            listItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
+            listItem.innerHTML = `
+                <span>${project.title}</span>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary edit-btn" data-id="${project._id}">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${project._id}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+            projectsContainer.appendChild(listItem);
+        });
+    };
+    
+
+    // Cargar la lista de proyectos al cargar la página
+    fetchProjects();
+
+    // Enviar el formulario para crear el nuevo proyecto
+    projectForm.addEventListener("submit", async (event) => {
+        event.preventDefault(); // Evitar el envío tradicional del formulario
+
+        // Obtener el título del formulario
+        const title = document.getElementById("projectTitle").value;
+
+        // Obtener el token del localStorage
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("Por favor, inicia sesión primero.");
+            return;
+        }
+
+        // Decodificar el token para extraer el userId
+        let userId;
+        try {
+            const decodedToken = JSON.parse(atob(token.split(".")[1])); // Decodificar el payload del token JWT
+            userId = decodedToken.userId;
+        } catch (error) {
+            console.error("Error al decodificar el token:", error);
+            alert("Token inválido. Por favor, inicia sesión nuevamente.");
+            return;
+        }
+
+        // Realizar la solicitud para crear el proyecto
+        try {
+            const response = await fetch("http://localhost:3000/graphql", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token}`, // Enviar el token en los headers
                 },
                 body: JSON.stringify({
                     query: `
@@ -47,10 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             }
                         }
                     `,
-                    variables: {
-                        title,
-                        userId: token, // Se asume que el ID de usuario está en el token
-                    }
+                    variables: { title, userId }, // Enviar título y userId
                 }),
             });
 
@@ -60,7 +139,10 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 alert("Proyecto creado con éxito.");
                 createProjectForm.style.display = "none"; // Ocultar el formulario después de enviar
-                // Opcionalmente, podrías actualizar la lista de proyectos aquí
+                document.getElementById("projectTitle").value = ""; // Limpiar el campo del formulario
+
+                // Recargar la lista de proyectos
+                fetchProjects();
             }
         } catch (error) {
             console.error("Error al crear el proyecto:", error);
@@ -68,6 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
 
 // Delete Projects
 
