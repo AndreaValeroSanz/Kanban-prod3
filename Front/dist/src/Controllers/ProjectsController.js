@@ -1,11 +1,17 @@
-// Add Projects
-
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const createProjectButton = document.getElementById("createProjectButton");
     const createProjectForm = document.getElementById("createProjectForm");
     const projectForm = document.getElementById("projectForm");
-    const editProjectForm = document.getElementById("editProjectForm"); // El formulario para editar proyectos
-    const projectTitleInput = document.getElementById("editProjectTitle"); // Input para editar el título
+    const editProjectForm = document.getElementById("editProjectForm");
+    const projectTitleInput = document.getElementById("editProjectTitle");
+    const projectsContainer = document.getElementById("projectsContainer");
+    const cancelButton = document.getElementById("cancelButton");
+    const cancelEditButton = document.getElementById("cancelEditButton");
+    const cardsContainer = document.getElementById("cardsContainer");
+
+    // Recargar la lista de proyectos al cargar la página
+    const projects = await fetchProjects(); // Llamada a la función importada
+    renderProjects(projects); // Usamos los proyectos obtenidos de fetchProjects
 
     let currentEditProjectId = null; // Variable para guardar el ID del proyecto que se está editando
 
@@ -23,46 +29,52 @@ document.addEventListener("DOMContentLoaded", () => {
         createProjectForm.style.display = "none";
     });
 
-    // Función para recargar la lista de proyectos
+    // Función para obtener los proyectos (ya declarada)
     const fetchProjects = async () => {
         const token = localStorage.getItem("token");
         if (!token) {
             console.error("No se encontró un token válido. Por favor, inicia sesión.");
-            return;
+            return [];
         }
-
+    
         try {
             const response = await fetch("http://localhost:3000/graphql", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Accept: "application/json",
-                    Authorization: `Bearer ${token}`,
+                    "Authorization": `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     query: `
-                        query {
-                            projects {
-                                _id
-                                title
-                            }
+                       query {
+                        getAllProjects {
+                        _id
+                        title
+                        user_id
                         }
+                    }
                     `,
                 }),
             });
-
+    
+            // Verificar si la respuesta es correcta
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+    
             const result = await response.json();
             if (result.errors) {
                 console.error("Error al obtener los proyectos:", result.errors[0].message);
-                return;
+                return [];
             }
-
-            const projects = result.data.projects;
-            renderProjects(projects);
+    
+            return result.data.projects; // Devolver los proyectos desde el servidor
         } catch (error) {
             console.error("Error al obtener los proyectos:", error);
+            return [];
         }
     };
+    
 
     // Función para renderizar los proyectos en el contenedor
     const renderProjects = (projects) => {
@@ -84,10 +96,9 @@ document.addEventListener("DOMContentLoaded", () => {
             projectsContainer.appendChild(listItem);
         });
     };
-    
 
-    // Cargar la lista de proyectos al cargar la página
-    fetchProjects();
+    // Llamar a la función fetchProjects para cargar los proyectos al cargar la página
+    // ya lo hicimos en la primera parte con const projects = await fetchProjects();
 
     // Enviar el formulario para crear el nuevo proyecto
     projectForm.addEventListener("submit", async (event) => {
@@ -153,107 +164,4 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Hubo un error al crear el proyecto. Intenta nuevamente.");
         }
     });
-});
-
-
-// Delete Projects
-
-
-// Edit Projects
-
-const editProject = async (projectId) => {
-    // Mostrar el formulario de edición
-    editProjectForm.style.display = "block";
-    currentEditProjectId = projectId;
-
-    // Obtener el proyecto para editarlo
-    const token = localStorage.getItem("token");
-    if (!token) {
-        alert("Por favor, inicia sesión primero.");
-        return;
-    }
-
-    try {
-        const response = await fetch("http://localhost:3000/graphql", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                query: `
-                    query GetProjectById($id: ID!) {
-                        project(id: $id) {
-                            _id
-                            title
-                        }
-                    }
-                `,
-                variables: { id: projectId },
-            }),
-        });
-
-        const result = await response.json();
-        if (result.errors) {
-            console.error("Error al obtener el proyecto:", result.errors[0].message);
-            return;
-        }
-
-        const project = result.data.project;
-        projectTitleInput.value = project.title; // Cargar el título del proyecto en el formulario
-
-    } catch (error) {
-        console.error("Error al cargar el proyecto:", error);
-        alert("Hubo un error al cargar el proyecto. Intenta nuevamente.");
-    }
-};
-
-// Enviar el formulario para editar el proyecto
-editProjectForm.addEventListener("submit", async (event) => {
-    event.preventDefault(); // Evitar el envío tradicional del formulario
-
-    const newTitle = projectTitleInput.value;
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-        alert("Por favor, inicia sesión primero.");
-        return;
-    }
-
-    // Realizar la solicitud para actualizar el proyecto
-    try {
-        const response = await fetch("http://localhost:3000/graphql", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                query: `
-                    mutation EditProject($id: ID!, $title: String!) {
-                        editProject(id: $id, title: $title) {
-                            _id
-                            title
-                        }
-                    }
-                `,
-                variables: { id: currentEditProjectId, title: newTitle },
-            }),
-        });
-
-        const result = await response.json();
-        if (result.errors) {
-            console.error("Error al editar el proyecto:", result.errors);
-            alert("Error al editar el proyecto.");
-        } else {
-            alert("Proyecto editado con éxito.");
-            editProjectForm.style.display = "none"; // Ocultar el formulario de edición
-            fetchProjects(); // Recargar los proyectos después de la edición
-        }
-    } catch (error) {
-        console.error("Error al editar el proyecto:", error);
-        alert("Hubo un error al editar el proyecto. Intenta nuevamente.");
-    }
 });

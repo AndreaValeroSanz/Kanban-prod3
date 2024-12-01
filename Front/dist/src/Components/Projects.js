@@ -70,12 +70,24 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${project._id}">
                         <i class="bi bi-trash"></i>
                     </button>
+                    <button class="btn btn-sm btn-outline-secondary dashboard-btn" data-id="${project._id}">
+                            <i class="bi bi-box-arrow-up-right"></i>
+                        </button>
                 </div>
             `;
             list.appendChild(listItem);
         });
 
         projectsContainer.appendChild(list);
+
+        // Añadir eventos a los botones de "Ir al Dashboard"
+        document.querySelectorAll(".dashboard-btn").forEach((btn) =>
+            btn.addEventListener("click", async (event) => {
+                const projectId = event.currentTarget.getAttribute("data-id");
+                localStorage.setItem("projectId", projectId); // Guardar ID del proyecto
+                window.location.href = `dashboard.html?projectId=${projectId}`;
+            })
+        );
 
         // Añadir eventos a los botones de edición
         document.querySelectorAll(".edit-btn").forEach((btn) =>
