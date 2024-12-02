@@ -31,7 +31,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Verificar si la solicitud HTTP fue exitosa
         if (!response.ok) {
             console.error(`Error HTTP: ${response.status}`);
-            alert("Error al cargar los proyectos. Por favor, intenta más tarde.");
             return;
         }
 
@@ -181,6 +180,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     } catch (error) {
         console.error("Connection error:", error);
-        alert("Error al cargar los proyectos. Intenta más tarde.");
     }
 });

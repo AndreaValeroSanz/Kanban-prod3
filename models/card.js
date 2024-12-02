@@ -30,7 +30,7 @@ const CardSchema = new Schema({
   projects_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Project', // Referencia al modelo Project
-    required: false,
+    required: true,
   },
 }, { timestamps: false });
 

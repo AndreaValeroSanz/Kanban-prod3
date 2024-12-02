@@ -32,8 +32,8 @@ const typeDefs = gql`
   }
 
   type Query {
-    getAllCards: [Card]
-    projects: [Project!]!
+  getAllCards(projectId: ID): [Card]
+  projects: [Project!]!
   }
 
   type Project {

@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
 import Card from '../models/card.js'; // Ensure you have the Card model
 import Project from '../models/project.js';
-import project from '../models/project.js';
+
 
 const SECRET_KEY = "gommit";
 
@@ -14,7 +14,9 @@ const resolvers = {
       if (!userId) {
         throw new Error('No autorizado');
       }
-console.log("backend",projectId);
+      console.log("Project ID:", projectId);
+      
+
       // Si no se pasa un projectId, devolver todas las tarjetas del usuario
       let query = { user_id: userId };
 
