@@ -41,7 +41,10 @@ async function getAllTasks() {
       }
     }
   `;
-
+  const urlParams = new URLSearchParams(window.location.search);
+  const projectId = urlParams.get('projectId');
+  console.log("Project ID:", projectId);
+  
   try {
     const response = await fetch('http://localhost:3000/graphql', {
       method: 'POST',
@@ -49,7 +52,10 @@ async function getAllTasks() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({
+        query,
+        variables: { projectId }, // Pasamos projectId dentro de un objeto 'variables'
+      }),
     });
 
     if (!response.ok) {

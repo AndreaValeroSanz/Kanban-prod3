@@ -3,23 +3,35 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
 import Card from '../models/card.js'; // Ensure you have the Card model
 import Project from '../models/project.js';
+import project from '../models/project.js';
 
 const SECRET_KEY = "gommit";
 
 const resolvers = {
-  Query: {
-    getAllCards: async (_, __, { userId }) => {
-      try {
-        if (!userId) {
-          throw new Error('No autorizado');
-        }
-
-        const cards = await Card.find({ user_id: userId });
-        return cards;
-      } catch (error) {
-        throw new Error(error.message);
+  Query: { getAllCards: async (_, { projectId }, { userId }) => {
+    try {
+      // Verificar si el usuario está autenticado
+      if (!userId) {
+        throw new Error('No autorizado');
       }
-    },
+console.log("backend",projectId);
+      // Si no se pasa un projectId, devolver todas las tarjetas del usuario
+      let query = { user_id: userId };
+
+      // Si se pasa un projectId, agregar el filtro para projectId
+      if (projectId) {
+        query.projects_id = projectId;
+      }
+
+      // Buscar las tarjetas que coincidan con los filtros
+      const cards = await Card.find(query);
+      return cards;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  },
+
+    
 
     projects: async (_, __, { userId }) => {
       try {
