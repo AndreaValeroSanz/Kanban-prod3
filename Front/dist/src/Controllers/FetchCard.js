@@ -52,10 +52,7 @@ async function getAllTasks() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({
-        query,
-        variables: { projectId }, // Pasamos projectId dentro de un objeto 'variables'
-      }),
+      body: JSON.stringify({ query }),
     });
 
     if (!response.ok) {
