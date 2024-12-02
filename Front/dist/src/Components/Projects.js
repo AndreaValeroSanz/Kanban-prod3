@@ -61,8 +61,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         projects.forEach((project) => {
             const listItem = document.createElement("li");
             listItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
-            listItem.innerHTML = `
-                <span>${project.title}</span>
+            listItem.innerHTML = `<div>
+             <button class="btn btn-sm btn-outline-secondary dashboard-btn " data-id="${project._id}">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                        </button>    
+            <span class="px-2">${project.title}</span></div>
                 <div>
                     <button class="btn btn-sm btn-outline-primary edit-btn" data-id="${project._id}">
                         <i class="bi bi-pencil-square"></i>
@@ -70,9 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${project._id}">
                         <i class="bi bi-trash"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary dashboard-btn" data-id="${project._id}">
-                            <i class="bi bi-box-arrow-up-right"></i>
-                        </button>
+                   
                 </div>
             `;
             list.appendChild(listItem);
