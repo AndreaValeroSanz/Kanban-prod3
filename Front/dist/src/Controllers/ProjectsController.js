@@ -9,34 +9,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const cancelEditButton = document.getElementById("cancelEditButton");
     const cardsContainer = document.getElementById("cardsContainer");
 
-    // Recargar la lista de proyectos al cargar la página
-    const projects = await fetchProjects(); // Llamada a la función importada
-    renderProjects(projects); // Usamos los proyectos obtenidos de fetchProjects
-
-    let currentEditProjectId = null; // Variable para guardar el ID del proyecto que se está editando
-
-    // Inicialmente ocultar el formulario
-    createProjectForm.style.display = "none";
-    editProjectForm.style.display = "none";
-
-    // Mostrar el formulario al hacer clic en el botón "Crear nuevo proyecto"
-    createProjectButton.addEventListener("click", () => {
-        createProjectForm.style.display = "block";
-    });
-
-    // Cancelar la creación del proyecto
-    cancelButton.addEventListener("click", () => {
-        createProjectForm.style.display = "none";
-    });
-
-    // Función para obtener los proyectos (ya declarada)
+    // Función para obtener los proyectos
     const fetchProjects = async () => {
         const token = localStorage.getItem("token");
         if (!token) {
             console.error("No se encontró un token válido. Por favor, inicia sesión.");
             return [];
         }
-    
+
         try {
             const response = await fetch("http://localhost:3000/graphql", {
                 method: "POST",
@@ -46,35 +26,33 @@ document.addEventListener("DOMContentLoaded", async () => {
                 },
                 body: JSON.stringify({
                     query: `
-                       query {
-                        getAllProjects {
-                        _id
-                        title
-                        user_id
+                        query {
+                            getAllProjects {
+                                _id
+                                title
+                                user_id
+                            }
                         }
-                    }
                     `,
                 }),
             });
-    
-            // Verificar si la respuesta es correcta
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-    
+
             const result = await response.json();
             if (result.errors) {
                 console.error("Error al obtener los proyectos:", result.errors[0].message);
                 return [];
             }
-    
-            return result.data.projects; // Devolver los proyectos desde el servidor
+
+            return result.data.getAllProjects; // Devuelve los proyectos obtenidos
         } catch (error) {
             console.error("Error al obtener los proyectos:", error);
             return [];
         }
     };
-    
 
     // Función para renderizar los proyectos en el contenedor
     const renderProjects = (projects) => {
@@ -97,10 +75,27 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     };
 
-    // Llamar a la función fetchProjects para cargar los proyectos al cargar la página
-    // ya lo hicimos en la primera parte con const projects = await fetchProjects();
+    // Recargar la lista de proyectos al cargar la página
+    const projects = await fetchProjects(); // Llamada a fetchProjects
+    renderProjects(projects); // Renderizar proyectos obtenidos
 
-    // Enviar el formulario para crear el nuevo proyecto
+    let currentEditProjectId = null; // Variable para guardar el ID del proyecto que se está editando
+
+    // Inicialmente ocultar los formularios
+    createProjectForm.style.display = "none";
+    editProjectForm.style.display = "none";
+
+    // Mostrar el formulario al hacer clic en el botón "Crear nuevo proyecto"
+    createProjectButton.addEventListener("click", () => {
+        createProjectForm.style.display = "block";
+    });
+
+    // Cancelar la creación del proyecto
+    cancelButton.addEventListener("click", () => {
+        createProjectForm.style.display = "none";
+    });
+
+    // Enviar el formulario para crear un nuevo proyecto
     projectForm.addEventListener("submit", async (event) => {
         event.preventDefault(); // Evitar el envío tradicional del formulario
 
@@ -157,7 +152,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 document.getElementById("projectTitle").value = ""; // Limpiar el campo del formulario
 
                 // Recargar la lista de proyectos
-                fetchProjects();
+                const projects = await fetchProjects();
+                renderProjects(projects);
             }
         } catch (error) {
             console.error("Error al crear el proyecto:", error);
