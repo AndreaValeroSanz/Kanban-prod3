@@ -1,4 +1,5 @@
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
+    // Obtener los elementos del DOM
     const createProjectButton = document.getElementById("createProjectButton");
     const createProjectForm = document.getElementById("createProjectForm");
     const projectForm = document.getElementById("projectForm");
@@ -7,7 +8,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const projectsContainer = document.getElementById("projectsContainer");
     const cancelButton = document.getElementById("cancelButton");
     const cancelEditButton = document.getElementById("cancelEditButton");
-    const cardsContainer = document.getElementById("cardsContainer");
+
+    // Configuración de scroll para projectsContainer
+    projectsContainer.style.maxHeight = "400px"; // Ajusta la altura máxima del contenedor
+    projectsContainer.style.overflowY = "auto"; // Habilita el scroll vertical
 
     // Función para obtener los proyectos
     const fetchProjects = async () => {
@@ -27,7 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 body: JSON.stringify({
                     query: `
                         query {
-                            getAllProjects {
+                            projects {
                                 _id
                                 title
                                 user_id
@@ -38,6 +42,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
 
             if (!response.ok) {
+                const errorResponse = await response.text(); // Obtener el cuerpo de la respuesta en caso de error
+                console.error(`Error HTTP: ${response.status}. Detalles: ${errorResponse}`);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
@@ -47,14 +53,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return [];
             }
 
-            return result.data.getAllProjects; // Devuelve los proyectos obtenidos
+            return result.data.projects;
         } catch (error) {
             console.error("Error al obtener los proyectos:", error);
             return [];
         }
     };
 
-    // Función para renderizar los proyectos en el contenedor
+    // Función para renderizar los proyectos
     const renderProjects = (projects) => {
         projectsContainer.innerHTML = ""; // Limpiar el contenedor
         projects.forEach((project) => {
@@ -75,22 +81,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     };
 
-    // Recargar la lista de proyectos al cargar la página
-    const projects = await fetchProjects(); // Llamada a fetchProjects
-    renderProjects(projects); // Renderizar proyectos obtenidos
+    // Cargar y renderizar los proyectos al inicio
+    const loadAndRenderProjects = async () => {
+        const projects = await fetchProjects();
+        renderProjects(projects);
+    };
 
-    let currentEditProjectId = null; // Variable para guardar el ID del proyecto que se está editando
+    loadAndRenderProjects(); // Cargar proyectos al cargar la página
 
-    // Inicialmente ocultar los formularios
-    createProjectForm.style.display = "none";
-    editProjectForm.style.display = "none";
-
-    // Mostrar el formulario al hacer clic en el botón "Crear nuevo proyecto"
+    // Mostrar el formulario de creación de proyecto
     createProjectButton.addEventListener("click", () => {
         createProjectForm.style.display = "block";
     });
 
-    // Cancelar la creación del proyecto
+    // Ocultar el formulario de creación de proyecto
     cancelButton.addEventListener("click", () => {
         createProjectForm.style.display = "none";
     });
@@ -99,35 +103,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     projectForm.addEventListener("submit", async (event) => {
         event.preventDefault(); // Evitar el envío tradicional del formulario
 
-        // Obtener el título del formulario
         const title = document.getElementById("projectTitle").value;
-
-        // Obtener el token del localStorage
         const token = localStorage.getItem("token");
         if (!token) {
             alert("Por favor, inicia sesión primero.");
             return;
         }
 
-        // Decodificar el token para extraer el userId
         let userId;
         try {
-            const decodedToken = JSON.parse(atob(token.split(".")[1])); // Decodificar el payload del token JWT
-            userId = decodedToken.userId;
+            const decodedToken = JSON.parse(atob(token.split(".")[1])); // Decodificar el token
+            userId = decodedToken.userId; // Obtener el userId del token
         } catch (error) {
             console.error("Error al decodificar el token:", error);
             alert("Token inválido. Por favor, inicia sesión nuevamente.");
             return;
         }
 
-        // Realizar la solicitud para crear el proyecto
         try {
+            // Realizar la mutación para crear un nuevo proyecto
             const response = await fetch("http://localhost:3000/graphql", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Accept: "application/json",
-                    Authorization: `Bearer ${token}`, // Enviar el token en los headers
+                    "Authorization": `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     query: `
@@ -139,22 +138,31 @@ document.addEventListener("DOMContentLoaded", async () => {
                             }
                         }
                     `,
-                    variables: { title, userId }, // Enviar título y userId
+                    variables: { title, userId }, // Enviar título y userId como variables
                 }),
             });
 
+            if (!response.ok) {
+                const errorResponse = await response.text(); // Obtener el cuerpo de la respuesta en caso de error
+                console.error(`Error HTTP: ${response.status}. Detalles: ${errorResponse}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const result = await response.json();
             if (result.errors) {
-                alert("Error al crear el proyecto: " + result.errors[0].message);
-            } else {
-                alert("Proyecto creado con éxito.");
-                createProjectForm.style.display = "none"; // Ocultar el formulario después de enviar
-                document.getElementById("projectTitle").value = ""; // Limpiar el campo del formulario
-
-                // Recargar la lista de proyectos
-                const projects = await fetchProjects();
-                renderProjects(projects);
+                console.error("Error al crear el proyecto:", result.errors[0].message);
+                alert("Error al crear el proyecto.");
+                return;
             }
+
+            alert("Proyecto creado con éxito.");
+
+            // Limpiar el formulario
+            createProjectForm.style.display = "none";
+            document.getElementById("projectTitle").value = "";
+
+            // Recargar la lista de proyectos
+            await loadAndRenderProjects();
         } catch (error) {
             console.error("Error al crear el proyecto:", error);
             alert("Hubo un error al crear el proyecto. Intenta nuevamente.");
