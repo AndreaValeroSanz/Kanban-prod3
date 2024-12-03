@@ -147,7 +147,9 @@ class AddTask extends HTMLElement {
     }
 
     // Define the default project ID
-    const defaultProjectId = "67224b9d9040a876aa6e7013";
+    const defaultProjectId =  new URLSearchParams(window.location.search).get(
+      "projectId"
+    );
 
     // Convert due date to dd/mm/yyyy format
     const dateObj = new Date(duedate);

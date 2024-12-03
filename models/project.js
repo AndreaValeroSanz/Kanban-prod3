@@ -10,6 +10,7 @@ const projectSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    
 });
 
 export default mongoose.model('Project', projectSchema);

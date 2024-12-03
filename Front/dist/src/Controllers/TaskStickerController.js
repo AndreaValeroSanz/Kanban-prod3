@@ -51,6 +51,7 @@ class TaskStickerController extends HTMLElement {
         }
       });
     }
+    
   }
   
   customElements.define('task-sticker-controller', TaskStickerController);
