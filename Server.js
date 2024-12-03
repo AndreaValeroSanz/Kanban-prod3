@@ -2,6 +2,7 @@ import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import typeDefs from './Schemas/Schema.js';
 import resolvers from './Resolvers/Resolver.js';
+import mongoose from 'mongoose';
 import { connectDB } from './config/db.js';
 import { auth } from './auth.js';
 import cors from 'cors';
