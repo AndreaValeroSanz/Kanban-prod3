@@ -55,6 +55,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const token = result.data.login.token;
             localStorage.setItem("token", token);
             localStorage.setItem("userEmail", email);
+            const userId = result.data.login.user._id;
+            localStorage.setItem("userId", userId);
 
             alert("Login successful");
 

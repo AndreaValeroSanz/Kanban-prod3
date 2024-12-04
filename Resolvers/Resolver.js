@@ -68,6 +68,7 @@ const resolvers = {
         );
 
         return {
+          userId: user._id,
           token,
           user,
         };

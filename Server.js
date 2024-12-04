@@ -27,9 +27,6 @@ const io = new Server(httpServer, {
 
 app.use(cors());
 
-// Configurar CORS
-app.use(cors());
-
 const startServer = async () => {
   const server = new ApolloServer({
     typeDefs,
