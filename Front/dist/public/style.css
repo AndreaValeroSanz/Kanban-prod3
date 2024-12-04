@@ -306,3 +306,9 @@ border-color: #702a5e;
   border-color: #fed789;
 
 }
+
+#projectsContainer {
+  max-height: 700px;
+  overflow-y: auto;
+  padding-right: 15px;
+}
