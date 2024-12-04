@@ -1,3 +1,11 @@
+import { io } from "socket.io-client";
+const socket = io('http://localhost:3000');
+socket.on('connect', () => {
+  console.log('Conectado al servidor de Socket.IO con ID:', socket.id);
+});
+socket.on('connect_error', (error) => {
+  console.error('Error al conectar con Socket.IO:', error);
+});
 class TaskSticker extends HTMLElement {
 
 
@@ -30,6 +38,7 @@ class TaskSticker extends HTMLElement {
   setUniqueIdentifiers(attributes) {
     this.setAttribute('data-key', attributes.dataKey);
     this.setAttribute('data-modal-id', attributes.modalId);
+    this.setAttribute('card-id', attributes.cardId);
     console.log("Initializing TaskSticker with dataKey:", attributes.dataKey);
     console.log("Card ID:", attributes.cardId); // Verifica que el Card ID sea válido
   }
@@ -162,7 +171,7 @@ class TaskSticker extends HTMLElement {
 
   getModalHTML({ title, description, dueDate, modalId, color }, selectedWorkareas) {
     return `
-      <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content background-${color}">
             <div class="modal-header">
@@ -177,15 +186,13 @@ class TaskSticker extends HTMLElement {
                 <textarea class="form-control" id="editDescription-${modalId}" rows="3" placeholder="Task Description">${description}</textarea>
               </div>
               <div class="mb-3">
-                <label>Workarea</label>
-                <div>
-                  ${this.getWorkareaOptions(selectedWorkareas)}
-                </div>
+                <label for="fileUpload-${modalId}">Subir Archivo</label>
+                <input type="file" class="form-control" id="fileUpload-${modalId}">
+                <button type="button" class="btn btn-primary mt-2" id="uploadFile-${modalId}">Subir Archivo</button>
               </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-danger delete-task">Delete</button>
-              <button type="button" class="btn btn-secondary share-task">Share</button>
               <button type="button" class="btn btn-primary save-task">Save</button>
             </div>
           </div>
@@ -193,6 +200,7 @@ class TaskSticker extends HTMLElement {
       </div>
     `;
   }
+  
 
    getWorkareaOptions(selectedWorkareas) {
     const workareas = ['Front', 'Back', 'Server', 'Testing'];
@@ -207,8 +215,48 @@ class TaskSticker extends HTMLElement {
 
   addEventListeners(modalId, dataKey) {
     const card = this.querySelector('.card');
-    const modal = this.querySelector(`#${modalId}`);
-
+      const modal = this.querySelector(`#${modalId}`);
+      const uploadButton = modal.querySelector(`#uploadFile-${modalId}`);
+      const fileInput = modal.querySelector(`#fileUpload-${modalId}`);
+      const cardId = this.getAttribute('card-id');
+  
+      console.log('Modal:', modal);
+      console.log('Upload Button:', uploadButton);
+      console.log('File Input:', fileInput);
+  
+      if (uploadButton && fileInput) {
+        uploadButton.addEventListener('click', () => {
+          console.log('Upload button clicked');
+          const file = fileInput.files[0];
+          if (!file) {
+            alert('Por favor selecciona un archivo.');
+            return;
+          }
+  
+          const reader = new FileReader();
+          reader.onload = () => {
+            console.log('File read successfully');
+            const base64Content = reader.result.split(',')[1];
+  
+            socket.emit('upload_task_file', {
+              cardId,
+              fileName: file.name,
+              fileContent: base64Content,
+            }, (response) => {
+              console.log('Socket.IO response:', response);
+              if (response.success) {
+                alert('Archivo subido exitosamente.');
+              } else {
+                alert(`Error al subir archivo: ${response.message}`);
+              }
+            });
+          };
+          reader.readAsDataURL(file);
+        });
+      } else {
+        console.error('Upload button or file input not found.');
+      }
+    
     if (card && modal) {
       // Usa `bind(this)` para asegurarte de que `this` se refiera a la instancia de `TaskSticker`
       card.addEventListener('click', this.showModal.bind(this, modal));
