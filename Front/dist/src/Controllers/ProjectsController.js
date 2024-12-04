@@ -78,41 +78,50 @@ const editProject = async (projectId, newTitle, token) => {
 
 // Eliminar un proyecto
 const deleteProject = async (projectId, token) => {
-    try {
-        const response = await fetch("http://localhost:3000/graphql", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                query: `
-                    mutation DeleteProject($id: ID!) {
-                        deleteProject(id: $id) {
-                            _id
-                            title
-                        }
-                    }
-                `,
-                variables: { id: projectId },
-            }),
-        });
+     try {
+         const response = await fetch("http://localhost:3000/graphql", {
+             method: "POST",
+             headers: {
+                 "Content-Type": "application/json",
+                 "Authorization": `Bearer ${token}`,
+             },
+             body: JSON.stringify({
+                 query: `
+                     mutation DeleteProject($id: ID!) {
+                         deleteProject(id: $id) {
+                             _id
+                             title
+                         }
+                     }
+                 `,
+                 variables: { id: projectId },
+             }),
+         });
 
-        const result = await response.json();
+         const result = await response.json();
 
-        if (result.errors) {
-            alert("Error al eliminar el proyecto: " + result.errors[0].message);
-            return false;
-        }
+         // Verifica la respuesta del servidor
+         console.log('Response from server:', result);
 
-        alert("Proyecto eliminado con éxito.");
-        return true;
-    } catch (error) {
-        console.error("Error al eliminar el proyecto:", error);
-        alert("Hubo un error al eliminar el proyecto.");
-        return false;
-    }
-};
+         if (result.errors) {
+             alert("Error al eliminar el proyecto: " + result.errors[0].message);
+             return false;
+         }
+
+         // Verifica que el proyecto se ha eliminado
+         if (result.data.deleteProject) {
+             alert("Proyecto eliminado con éxito.");
+             return true;
+         } else {
+             alert("No se pudo eliminar el proyecto.");
+             return false;
+         }
+     } catch (error) {
+         console.error("Error al eliminar el proyecto:", error);
+         alert("Hubo un error al eliminar el proyecto.");
+         return false;
+     }
+ };
 
 // Exportar las funciones
 export { createProject, editProject, deleteProject };

@@ -8,32 +8,33 @@ import Project from '../models/project.js';
 const SECRET_KEY = "gommit";
 
 const resolvers = {
-  Query: { getAllCards: async (_, { projectId }, { userId }) => {
-    try {
-      // Verificar si el usuario está autenticado
-      if (!userId) {
-        throw new Error('No autorizado');
+  Query: {
+    getAllCards: async (_, { projectId }, { userId }) => {
+      try {
+        // Verificar si el usuario está autenticado
+        if (!userId) {
+          throw new Error('No autorizado');
+        }
+        console.log("Project ID:", projectId);
+
+
+        // Si no se pasa un projectId, devolver todas las tarjetas del usuario
+        let query = { user_id: userId };
+
+        // Si se pasa un projectId, agregar el filtro para projectId
+        if (projectId) {
+          query.projects_id = projectId;
+        }
+
+        // Buscar las tarjetas que coincidan con los filtros
+        const cards = await Card.find(query);
+        return cards;
+      } catch (error) {
+        throw new Error(error.message);
       }
-      console.log("Project ID:", projectId);
-      
+    },
 
-      // Si no se pasa un projectId, devolver todas las tarjetas del usuario
-      let query = { user_id: userId };
 
-      // Si se pasa un projectId, agregar el filtro para projectId
-      if (projectId) {
-        query.projects_id = projectId;
-      }
-
-      // Buscar las tarjetas que coincidan con los filtros
-      const cards = await Card.find(query);
-      return cards;
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  },
-
-    
 
     projects: async (_, __, { userId }) => {
       try {
@@ -178,46 +179,71 @@ const resolvers = {
 
     createProject: async (_, { title, userId }) => {
       try {
-          // Crear un nuevo proyecto con los datos recibidos
-          const newProject = new Project({
-              title,
-              user_id: userId, // Vincular con el ID del usuario
-          });
+        // Crear un nuevo proyecto con los datos recibidos
+        const newProject = new Project({
+          title,
+          user_id: userId, // Vincular con el ID del usuario
+        });
 
-          // Guardar el proyecto en la base de datos
-          const savedProject = await newProject.save();
-          return savedProject;
+        // Guardar el proyecto en la base de datos
+        const savedProject = await newProject.save();
+        return savedProject;
       } catch (error) {
-          console.error("Error al crear el proyecto:", error);
-          throw new Error("No se pudo crear el proyecto.");
+        console.error("Error al crear el proyecto:", error);
+        throw new Error("No se pudo crear el proyecto.");
       }
+    },
+    editProject: async (_, { id, title }, { userId }) => {
+      try {
+        if (!userId) {
+          throw new Error('No autorizado');
+        }
+
+        // Buscar el proyecto con el ID proporcionado
+        const project = await Project.findOne({ _id: id, user_id: userId });
+
+        if (!project) {
+          throw new Error('Proyecto no encontrado o no autorizado');
+        }
+
+        // Actualizar el título del proyecto
+        project.title = title || project.title;  // Si no se pasa título, mantén el actual
+
+        // Guardar el proyecto actualizado
+        const updatedProject = await project.save();
+
+        return updatedProject;
+      } catch (error) {
+        throw new Error(`Error al editar el proyecto: ${error.message}`);
+      }
+    },
+
+    deleteProject: async (_, { id }) => {
+      try {
+        // Verificar si el proyecto existe antes de eliminarlo
+        const project = await Project.findById(id);
+        if (!project) {
+          throw new Error("Proyecto no encontrado");
+        }
+
+        // Eliminar todas las cards asociadas al proyecto
+        await Card.deleteMany({ projects_id: id });
+
+        // Eliminar el proyecto
+        const deletedProject = await Project.findByIdAndDelete(id);
+
+        if (!deletedProject) {
+          throw new Error("No se pudo eliminar el proyecto.");
+        }
+
+        console.log(`Proyecto eliminado: ${deletedProject.title}`);
+        return deletedProject; // Asegúrate de devolver el proyecto eliminado
+      } catch (error) {
+        console.error("Error al eliminar el proyecto:", error);
+        throw new Error("No se pudo eliminar el proyecto.");
+      }
+    },
   },
-  editProject: async (_, { id, title }, { userId }) => {
-    try {
-      if (!userId) {
-        throw new Error('No autorizado');
-      }
-  
-      // Buscar el proyecto con el ID proporcionado
-      const project = await Project.findOne({ _id: id, user_id: userId });
-  
-      if (!project) {
-        throw new Error('Proyecto no encontrado o no autorizado');
-      }
-  
-      // Actualizar el título del proyecto
-      project.title = title || project.title;  // Si no se pasa título, mantén el actual
-  
-      // Guardar el proyecto actualizado
-      const updatedProject = await project.save();
-  
-      return updatedProject;
-    } catch (error) {
-      throw new Error(`Error al editar el proyecto: ${error.message}`);
-    }
-  },
-  
-},
 };
 
 export default resolvers;

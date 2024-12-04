@@ -44,6 +44,7 @@ const typeDefs = gql`
 
   type Mutation {
     login(email: String!, password: String!): AuthPayload!
+
     createCard(
       title: String!
       description: String!
@@ -54,19 +55,22 @@ const typeDefs = gql`
     ): Card!
     
     deleteCard(id: ID!): Card!
-  editCard(
-      id: ID!
-      title: String
-      description: String
-      duedate: String
-      color: String
-    ): Card!
+
+    editCard(
+        id: ID!
+        title: String
+        description: String
+        duedate: String
+        color: String
+      ): Card!
     
     updateCardType(id: ID!, type: String!): Card!
 
     createProject(title: String!, userId: String!): Project!
     
-    editProject(id: ID!, title: String!): Project!   
+    editProject(id: ID!, title: String!): Project!
+
+    deleteProject(id: ID!): Project
   }
 `;
 
