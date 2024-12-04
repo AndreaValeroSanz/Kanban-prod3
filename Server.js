@@ -43,6 +43,9 @@ const startServer = async () => {
     },
   });
 
+  app.use(express.json({ limit: '2gb' })); // Ajusta el límite según lo necesario
+  app.use(express.urlencoded({ limit: '2gb', extended: true }));
+
   await server.start();
   server.applyMiddleware({ app });
 
@@ -74,7 +77,7 @@ const startServer = async () => {
       }
     
       const filePath = path.join(uploadDir, `${cardId}_${fileName}`);
-    
+      console.log('Guardando archivo en:', filePath);
       try {
         // Guarda el archivo en el sistema de archivos
         await fs.promises.writeFile(filePath, fileContent, 'base64');
