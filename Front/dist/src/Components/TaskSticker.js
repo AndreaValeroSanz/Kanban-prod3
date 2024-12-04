@@ -188,7 +188,10 @@ class TaskSticker extends HTMLElement {
               <div class="mb-3">
                 <textarea class="form-control" id="editDescription-${modalId}" rows="3" placeholder="Task Description">${description}</textarea>
               </div>
-              <div class="mb-3">
+              <div>
+                  ${this.getWorkareaOptions(selectedWorkareas)}
+                </div>
+              <div class="mb-3 pt-2">
                 <label for="fileUpload-${modalId}">Subir Archivo</label>
                 <input type="file" class="form-control" id="fileUpload-${modalId}">
                 <button type="button" class="btn btn-primary mt-2" id="uploadFile-${modalId}">Subir Archivo</button>
