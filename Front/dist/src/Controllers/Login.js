@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 user {
                     _id
                     email
+                    avatar
                 }
             }
         }
@@ -57,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("userEmail", email);
             const userId = result.data.login.user._id;
             localStorage.setItem("userId", userId);
-
+            localStorage.setItem("userAvatar", user.avatar || "");
             alert("Login successful");
 
             // Redirigir después del login exitoso
