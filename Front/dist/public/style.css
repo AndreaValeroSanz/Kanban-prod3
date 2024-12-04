@@ -307,8 +307,18 @@ border-color: #702a5e;
 
 }
 
+.dashboard-btn{
+  color: #702a5e;
+  outline-color: #702a5e;
+  border-color: #702a5e;
+}
+.dashboard-btn:hover{
+  background:#fed789;
+  border-color: #fed789;
+}
+
 #projectsContainer {
-  max-height: 700px;
+  max-height: 600px;
   overflow-y: auto;
   padding-right: 15px;
 }

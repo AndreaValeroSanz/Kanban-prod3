@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const createProjectForm = document.getElementById("createProjectForm");
     const projectForm = document.getElementById("projectForm");
     const cancelButton = document.getElementById("cancelButton");
-    const createProjectButton = document.getElementById("createProjectButton"); 
+    const createProjectButton = document.getElementById("createProjectButton");
 
     // Mostrar el formulario de creación de proyecto
     createProjectButton.addEventListener("click", () => {
@@ -76,7 +76,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             listItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
 
             listItem.innerHTML = `
-                <span>${project.title}</span>
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-sm btn-outline-primary dashboard-btn me-3" data-id="${project._id}">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                    </button>
+                    <span>${project.title}</span>
+                </div>
                 <div>
                     <button class="btn btn-sm btn-outline-primary edit-btn" data-id="${project._id}">
                         <i class="bi bi-pencil-square"></i>
@@ -106,6 +111,17 @@ document.addEventListener("DOMContentLoaded", async () => {
                     if (success) await loadAndRenderProjects();
                 }
             });
+        });
+
+        // Mostrar los Dashboard
+        document.querySelectorAll(".dashboard-btn").forEach((btn) => {
+            if (btn) {
+                btn.addEventListener("click", (event) => {
+                    const projectId = event.currentTarget.getAttribute("data-id");
+                    localStorage.setItem("projectId", projectId);
+                    window.location.href = `dashboard.html?projectId=${projectId}`;
+                });
+            }
         });
     };
 
