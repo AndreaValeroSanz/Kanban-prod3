@@ -12,6 +12,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import User from './models/user.js';
+import Card from './models/card.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,6 +43,9 @@ const startServer = async () => {
     },
   });
 
+  app.use(express.json({ limit: '2gb' })); // Ajusta el límite según lo necesario
+  app.use(express.urlencoded({ limit: '2gb', extended: true }));
+
   await server.start();
   server.applyMiddleware({ app });
 
@@ -58,6 +62,49 @@ const startServer = async () => {
 
   io.on('connection', (socket) => {
     console.log('Cliente conectado:', socket.id);
+
+    socket.on('upload_task_file', async (data, callback) => {
+      const { cardId, fileName, fileContent } = data;
+    
+      if (!cardId) {
+        callback({ success: false, message: 'ID de tarea no proporcionado.' });
+        return;
+      }
+    
+      const uploadDir = path.join(__dirname, 'uploads', 'tasks');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+    
+      const filePath = path.join(uploadDir, `${cardId}_${fileName}`);
+      console.log('Guardando archivo en:', filePath);
+      try {
+        // Guarda el archivo en el sistema de archivos
+        await fs.promises.writeFile(filePath, fileContent, 'base64');
+        console.log('Archivo guardado:', filePath);
+    
+        const fileUrl = `/uploads/tasks/${cardId}_${fileName}`;
+    
+        // Actualiza usando taskKey en lugar de _id
+        const result = await Card.findOneAndUpdate(
+          { _id: cardId }, // Usa taskKey como identificador
+          { $push: { files: fileUrl } },
+          { new: true }
+        );
+    
+        if (!result) {
+          callback({ success: false, message: 'Tarea no encontrada.' });
+          return;
+        }
+    
+        callback({ success: true, message: 'Archivo subido correctamente.', fileUrl });
+      } catch (err) {
+        console.error('Error al procesar el archivo o actualizar la base de datos:', err);
+        callback({ success: false, message: 'Error interno del servidor.' });
+      }
+    });
+    
+    
 
     socket.on('upload_avatar', async (data, callback) => {
       const { userId, fileName, fileContent } = data;

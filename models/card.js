@@ -1,10 +1,15 @@
 import mongoose from 'mongoose';
+import { type } from 'os';
 const Schema = mongoose.Schema;
 
 const CardSchema = new Schema({
   title: {
     type: String,
     required: true,
+  },
+  taskKey: {
+    type: String,
+    required: false,
   },
   description: {
     type: String,
@@ -32,6 +37,7 @@ const CardSchema = new Schema({
     ref: 'Project', // Referencia al modelo Project
     required: true,
   },
+  files: [String], // Almacena las URLs de los archivos subidos
 }, { timestamps: false });
 
 const Card = mongoose.model('Card', CardSchema);
