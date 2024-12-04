@@ -54,11 +54,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Extraer el token y guardar en localStorage
             const token = result.data.login.token;
+            const user = result.data.login.user;
+
             localStorage.setItem("token", token);
-            localStorage.setItem("userEmail", email);
-            const userId = result.data.login.user._id;
-            localStorage.setItem("userId", userId);
+            localStorage.setItem("userEmail", user.email);
             localStorage.setItem("userAvatar", user.avatar || "");
+            localStorage.setItem("userId", user._id);
             alert("Login successful");
 
             // Redirigir después del login exitoso
