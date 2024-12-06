@@ -4,24 +4,29 @@ class Header extends HTMLElement {
   }
 
   connectedCallback() {
+
+    // Obtener el nombre del proyecto seleccionado desde el localStorage
+    const projectName = localStorage.getItem("projectName") || "Dashboard";
+
     this.innerHTML = `
       <style>
           .divcolaborator-section {
             width: 50vh;
           }
-            
       </style>
+
         <div>
           <div class="row pt-5">
-            <div class="col-lg-2">
+            <div class="col-lr-10">
               <div class="d-flex justify-content-center">
                 <div class="btn-group dropend">
-                   <div class="d-flex justify-content-between align-items-around ">
-                        
-                          <h1>Dashboard</h1>
-                        
-                  
+                  <div class="d-flex justify-content-between align-items-around ">
+                    <h1>${projectName}</h1>
+                    <button id="backButton" class="btn btn-outline-secondary">
+                      <i id="backIcon" class="bi bi-arrow-left"></i>
+                    </button>
                   </div>
+                </div>
               </div>
             </div>
             <div class="col-lg-10 d-flex justify-content-end">
@@ -63,6 +68,13 @@ class Header extends HTMLElement {
             </div>
           </div>
         </div>`;
+
+    const backButton = this.querySelector("#backButton");
+    if (backButton) {
+      backButton.addEventListener("click", () => {
+        window.location.href = "projects.html"; // Redirigir a la lista de proyectos
+      });
+    }
   }
 }
 

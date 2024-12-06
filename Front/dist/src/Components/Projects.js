@@ -76,18 +76,18 @@ document.addEventListener("DOMContentLoaded", async () => {
             listItem.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");
 
             listItem.innerHTML = `
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center" style="background: #ffffff;">
                     <button class="btn btn-sm btn-outline-primary dashboard-btn me-3" data-id="${project._id}">
-                        <i class="bi bi-box-arrow-in-right"></i>
+                        <i id="dashboardIcon" class="bi bi-box-arrow-in-right"></i>
                     </button>
-                    <span>${project.title}</span>
+                    <span style="background: #ffffff;">${project.title}</span>
                 </div>
-                <div>
+                <div class="d-flex align-items-center" style="background: #ffffff;">
                     <button class="btn btn-sm btn-outline-primary edit-btn" data-id="${project._id}">
-                        <i class="bi bi-pencil-square"></i>
+                        <i id="editIcon" class="bi bi-pencil-square"></i>
                     </button>
                     <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${project._id}">
-                        <i class="bi bi-trash"></i>
+                        <i id="deleteIcon" class="bi bi-trash"></i>
                     </button>
                 </div>
             `;
@@ -118,7 +118,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (btn) {
                 btn.addEventListener("click", (event) => {
                     const projectId = event.currentTarget.getAttribute("data-id");
+                    const projectTitle = event.currentTarget.closest("li").querySelector("span").textContent;
                     localStorage.setItem("projectId", projectId);
+                    localStorage.setItem("projectName", projectTitle);
                     window.location.href = `dashboard.html?projectId=${projectId}`;
                 });
             }
